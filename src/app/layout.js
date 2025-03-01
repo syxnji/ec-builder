@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import { SessionProvider } from "next-auth/react";
 import { CartProvider } from "./context/CartContext";
 import { FiMail, FiPhone, FiMapPin, FiHeart, FiInstagram, FiTwitter, FiFacebook } from "react-icons/fi";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }) {
   return (
@@ -154,6 +155,28 @@ export default function RootLayout({ children }) {
                 </div>
               </div>
             </footer>
+            <Toaster position="top-right" toastOptions={{
+              style: {
+                background: '#333',
+                color: '#fff',
+                borderRadius: '8px',
+                padding: '16px',
+              },
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#10B981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                duration: 4000,
+                iconTheme: {
+                  primary: '#EF4444',
+                  secondary: '#fff',
+                },
+              },
+            }} />
           </CartProvider>
         </SessionProvider>
       </body>

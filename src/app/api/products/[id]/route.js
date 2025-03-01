@@ -47,7 +47,7 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { name, description, price, stock, imageUrl } = body;
+    const { name, description, price, stock, imageUrl, categoryId } = body;
 
     // 商品の存在確認
     const existingProduct = await prisma.product.findUnique({
@@ -69,7 +69,8 @@ export async function PUT(request, { params }) {
         description: description !== undefined ? description : existingProduct.description,
         price: price !== undefined ? parseFloat(price) : existingProduct.price,
         stock: stock !== undefined ? parseInt(stock) : existingProduct.stock,
-        imageUrl: imageUrl !== undefined ? imageUrl : existingProduct.imageUrl
+        imageUrl: imageUrl !== undefined ? imageUrl : existingProduct.imageUrl,
+        categoryId: categoryId !== undefined ? (categoryId ? parseInt(categoryId) : null) : existingProduct.categoryId
       }
     });
 

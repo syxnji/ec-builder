@@ -36,18 +36,60 @@ export async function POST(request) {
       );
     }
 
+    // 在庫チェック
+    const productIds = items.map(item => item.id);
+    const products = await prisma.product.findMany({
+      where: {
+        id: {
+          in: productIds
+        }
+      }
+    });
+
+    // 在庫不足の商品をチェック
+    const insufficientStockItems = [];
+    for (const item of items) {
+      const product = products.find(p => p.id === item.id);
+      if (!product) {
+        return NextResponse.json(
+          { error: `商品ID ${item.id} が見つかりません` },
+          { status: 404 }
+        );
+      }
+      
+      if (product.stock < item.quantity) {
+        insufficientStockItems.push({
+          id: product.id,
+          name: product.name,
+          requestedQuantity: item.quantity,
+          availableStock: product.stock
+        });
+      }
+    }
+
+    // 在庫不足の商品がある場合はエラーを返す
+    if (insufficientStockItems.length > 0) {
+      return NextResponse.json(
+        { 
+          error: '在庫が不足している商品があります',
+          insufficientStockItems 
+        },
+        { status: 400 }
+      );
+    }
+
     // 合計金額を計算
     const totalAmount = items.reduce((total, item) => total + (item.price * item.quantity), 0);
 
     // トランザクションを使用して在庫を更新し、注文を作成
-    const result = await prisma.$transaction(async (prisma) => {
+    const result = await prisma.$transaction(async (tx) => {
       // 注文を作成
-      const order = await prisma.order.create({
+      const order = await tx.order.create({
         data: {
           userId: user.id,
           totalAmount,
           status: 'completed',
-          orderItems: {
+          orderitem: {
             create: items.map(item => ({
               productId: item.id,
               quantity: item.quantity,
@@ -56,23 +98,21 @@ export async function POST(request) {
           }
         },
         include: {
-          orderItems: true
+          orderitem: true
         }
       });
 
       // 在庫を更新
-      await Promise.all(
-        items.map(item => {
-          return prisma.product.update({
-            where: { id: item.id },
-            data: {
-              stock: {
-                decrement: item.quantity
-              }
+      for (const item of items) {
+        await tx.product.update({
+          where: { id: item.id },
+          data: {
+            stock: {
+              decrement: item.quantity
             }
-          });
-        })
-      );
+          }
+        });
+      }
 
       return order;
     });
@@ -85,7 +125,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('チェックアウト処理に失敗しました:', error);
     return NextResponse.json(
-      { error: 'チェックアウト処理に失敗しました' },
+      { error: 'チェックアウト処理に失敗しました: ' + error.message },
       { status: 500 }
     );
   }

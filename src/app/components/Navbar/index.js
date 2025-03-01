@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { FiShoppingCart, FiUser, FiMenu, FiX, FiPackage, FiLogOut, FiSettings, FiHome, FiGrid } from 'react-icons/fi';
+import { FiShoppingCart, FiUser, FiMenu, FiX, FiPackage, FiLogOut, FiSettings, FiHome, FiGrid, FiInfo } from 'react-icons/fi';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/app/context/CartContext';
 
@@ -71,6 +71,11 @@ export default function Navbar() {
             <Link href="/products" className="text-foreground hover:text-primary transition-colors flex items-center gap-1 group relative py-2">
               <FiGrid className="transition-transform group-hover:scale-110" />
               <span>商品一覧</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+            <Link href="/about" className="text-foreground hover:text-primary transition-colors flex items-center gap-1 group relative py-2">
+              <FiInfo className="transition-transform group-hover:scale-110" />
+              <span>会社概要</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
             </Link>
             {user && (
@@ -174,6 +179,9 @@ export default function Navbar() {
             </Link>
             <Link href="/products" className="flex items-center gap-2 py-3 px-4 text-foreground hover:text-primary hover:bg-secondary/50 rounded-lg transition-colors">
               <FiGrid /> 商品一覧
+            </Link>
+            <Link href="/about" className="flex items-center gap-2 py-3 px-4 text-foreground hover:text-primary hover:bg-secondary/50 rounded-lg transition-colors">
+              <FiInfo /> 会社概要
             </Link>
             {user && (
               <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FiTrash2, FiArrowLeft, FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '@/app/context/CartContext';
@@ -11,10 +11,25 @@ export default function CartPage() {
     updateQuantity, 
     removeFromCart, 
     getCartTotal, 
-    isLoaded 
+    isLoaded,
+    refreshCartItems
   } = useCart();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  if (!isLoaded) {
+  // カート内の商品情報を最新の状態に更新
+  useEffect(() => {
+    const updateCartItems = async () => {
+      if (isLoaded && cartItems.length > 0) {
+        setIsRefreshing(true);
+        await refreshCartItems();
+        setIsRefreshing(false);
+      }
+    };
+
+    updateCartItems();
+  }, [isLoaded, refreshCartItems]);
+
+  if (!isLoaded || isRefreshing) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
@@ -59,9 +74,9 @@ export default function CartPage() {
                       <td className="p-4">
                         <div className="flex items-center">
                           <div className="w-16 h-16 bg-secondary rounded-md overflow-hidden mr-4">
-                            {item.image && (
+                            {item.imageUrl && (
                               <img 
-                                src={item.image} 
+                                src={item.imageUrl} 
                                 alt={item.name} 
                                 className="w-full h-full object-cover"
                               />
@@ -79,23 +94,32 @@ export default function CartPage() {
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center border border-border rounded-l-md hover:bg-secondary"
+                            disabled={item.quantity <= 1}
                           >
                             -
                           </button>
                           <input 
                             type="number" 
-                            min="1" 
+                            min="1"
+                            max={item.stock}
                             value={item.quantity}
-                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 1;
+                              updateQuantity(item.id, Math.min(value, item.stock));
+                            }}
                             className="w-12 h-8 border-y border-border text-center focus:outline-none"
                           />
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center border border-border rounded-r-md hover:bg-secondary"
+                            disabled={item.quantity >= item.stock}
                           >
                             +
                           </button>
                         </div>
+                        {item.stock < 10 && (
+                          <p className="text-xs text-amber-600 mt-1">残り{item.stock}点</p>
+                        )}
                       </td>
                       <td className="p-4 text-center font-medium">
                         ¥{(item.price * item.quantity).toLocaleString()}

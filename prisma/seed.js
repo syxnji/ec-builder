@@ -2,56 +2,117 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
+  // 管理者アカウントの作成
+  console.log('管理者アカウントを作成中...');
+  const admin = await prisma.user.create({
+    data: {
+      name: 'admin',
+      email: 'admin@mail.com',
+      password: '$2b$10$czyYILoTPk7W0/uKQ28nt.IY5hMSE9c4MbhQpMXoaGJxQ01h2ZZwK',
+      role: 'admin'
+    }
+  });
+  console.log(`管理者アカウントが作成されました: ${admin.email}`);
+
   // カテゴリーデータの作成
   const categories = [
-    { id: 'A', name: 'カテゴリーA' },
-    { id: 'B', name: 'カテゴリーB' },
-    { id: 'C', name: 'カテゴリーC' },
-    { id: 'D', name: 'カテゴリーD' },
+    { name: 'キーボード' },
+    { name: 'マウス' },
+    { name: 'ヘッドセット' },
+    { name: 'マウスパッド' },
+    { name: 'パッド' },
   ];
 
   console.log('カテゴリーデータを作成中...');
+  const createdCategories = [];
   for (const category of categories) {
-    await prisma.category.upsert({
-      where: { id: category.id },
-      update: {},
-      create: category,
+    const createdCategory = await prisma.category.create({
+      data: category,
     });
+    createdCategories.push(createdCategory);
   }
 
   // 商品データの作成
   const products = [
     {
-      name: '商品1',
-      price: 1000,
-      description: '商品1の説明文です。',
-      stock: 10,
-      imageUrl: 'https://placehold.jp/300x250.png',
-      categoryId: 'A',
-    },
-    {
-      name: '商品2',
-      price: 2000,
-      description: '商品2の説明文です。',
-      stock: 5,
-      imageUrl: 'https://placehold.jp/3d4070/ffffff/300x250.png?text=商品2',
-      categoryId: 'B',
-    },
-    {
-      name: '商品3',
+      name: 'キーボード A',
       price: 3000,
-      description: '商品3の説明文です。',
-      stock: 8,
-      imageUrl: 'https://placehold.jp/e83a3a/ffffff/300x250.png?text=商品3',
-      categoryId: 'C',
+      description: 'キーボード Aの説明文です。',
+      stock: 10,
+      imageUrl: '/images/keyboard (1).jfif',
+      categoryId: createdCategories[0].id,
     },
     {
-      name: '商品4',
+      name: 'キーボード B',
+      price: 3000,
+      description: 'キーボード Bの説明文です。',
+      stock: 10,
+      imageUrl: '/images/keyboard (2).jfif',
+      categoryId: createdCategories[0].id,
+    },
+    {
+      name: 'マウス A',
+      price: 2000,
+      description: 'マウス Aの説明文です。',
+      stock: 5,
+      imageUrl: '/images/mouse (1).jfif',
+      categoryId: createdCategories[1].id,
+    },
+    {
+      name: 'マウス B ',
+      price: 2000,
+      description: 'マウス Bの説明文です。',
+      stock: 5,
+      imageUrl: '/images/mouse (2).jfif',
+      categoryId: createdCategories[1].id,
+    },
+    {
+      name: 'ヘッドセット A',
+      price: 3000,
+      description: 'ヘッドセット Aの説明文です。',
+      stock: 8,
+      imageUrl: '/images/headset (1).jfif',
+      categoryId: createdCategories[2].id,
+    },
+    {
+      name: 'ヘッドセット B',
+      price: 3000,
+      description: 'ヘッドセット Bの説明文です。',
+      stock: 8,
+      imageUrl: '/images/headset (2).jfif',
+      categoryId: createdCategories[2].id,
+    },
+    {
+      name: 'マウスパッド A',
       price: 4000,
-      description: '商品4の説明文です。',
+      description: 'マウスパッド Aの説明文です。',
       stock: 3,
-      imageUrl: 'https://placehold.jp/27ae60/ffffff/300x250.png?text=商品4',
-      categoryId: 'D',
+      imageUrl: '/images/mousepad (1).jfif',
+      categoryId: createdCategories[3].id,
+    },
+    {
+      name: 'マウスパッド B',
+      price: 4000,
+      description: 'マウスパッド Bの説明文です。',
+      stock: 3,
+      imageUrl: '/images/mousepad (2).jfif',
+      categoryId: createdCategories[3].id,
+    },
+    {
+      name: 'パッド A',
+      price: 5000,
+      description: 'パッド Aの説明文です。',
+      stock: 12,
+      imageUrl: '/images/pad (1).jfif',
+      categoryId: createdCategories[4].id,
+    },
+    {
+      name: 'パッド B',
+      price: 5000,
+      description: 'パッド Bの説明文です。',
+      stock: 12,
+      imageUrl: '/images/pad (2).jfif',
+      categoryId: createdCategories[4].id,
     },
   ];
 

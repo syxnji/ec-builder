@@ -10,10 +10,11 @@ import { FiArrowLeft, FiCheck } from 'react-icons/fi';
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { cartItems, clearCart, getCartTotal, isLoaded } = useCart();
+  const { cartItems, clearCart, getCartTotal, isLoaded, refreshCartItems } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // ログイン状態をチェック
   useEffect(() => {
@@ -22,7 +23,20 @@ export default function CheckoutPage() {
     }
   }, [status, router]);
 
-  if (status === 'loading' || !isLoaded) {
+  // カート内の商品情報を最新の状態に更新
+  useEffect(() => {
+    const updateCartItems = async () => {
+      if (isLoaded && cartItems.length > 0) {
+        setIsRefreshing(true);
+        await refreshCartItems();
+        setIsRefreshing(false);
+      }
+    };
+
+    updateCartItems();
+  }, [isLoaded, refreshCartItems]);
+
+  if (status === 'loading' || !isLoaded || isRefreshing) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
@@ -48,6 +62,12 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
+      // 最新の商品情報を取得
+      const refreshResult = await refreshCartItems();
+      if (!refreshResult) {
+        throw new Error('商品情報の更新に失敗しました。もう一度お試しください。');
+      }
+
       // 在庫を減らすAPIを呼び出す
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -63,12 +83,21 @@ export default function CheckoutPage() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || '注文処理中にエラーが発生しました');
+        const data = await response.json();
+        if (data.insufficientStockItems) {
+          // 在庫不足エラーの場合は詳細なエラーメッセージを表示
+          const itemNames = data.insufficientStockItems.map(item => 
+            `${item.name}（在庫: ${item.availableStock}、注文: ${item.requestedQuantity}）`
+          ).join('、');
+          throw new Error(`在庫不足: ${itemNames}`);
+        } else {
+          throw new Error(data.error || '注文処理中にエラーが発生しました');
+        }
       }
 
+      const data = await response.json();
+      
       // 注文完了
       setIsComplete(true);
       clearCart();
@@ -113,9 +142,9 @@ export default function CheckoutPage() {
               {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center border-b border-border pb-4">
                   <div className="w-16 h-16 bg-secondary rounded-md overflow-hidden mr-4">
-                    {item.image && (
+                    {item.imageUrl && (
                       <img 
-                        src={item.image} 
+                        src={item.imageUrl} 
                         alt={item.name} 
                         className="w-full h-full object-cover"
                       />

@@ -19,19 +19,18 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { id, name } = body;
+    const { name } = body;
 
     // 必須フィールドの検証
-    if (!id || !name) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'カテゴリーIDと名前は必須です' },
+        { error: 'カテゴリー名は必須です' },
         { status: 400 }
       );
     }
 
     const category = await prisma.category.create({
       data: {
-        id,
         name
       }
     });

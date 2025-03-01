@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, description, price, stock, imageUrl } = body;
+    const { name, description, price, stock, imageUrl, categoryId } = body;
 
     // 必須フィールドの検証
     if (!name || !price) {
@@ -35,7 +35,8 @@ export async function POST(request) {
         description,
         price: parseFloat(price),
         stock: stock ? parseInt(stock) : 0,
-        imageUrl
+        imageUrl,
+        categoryId: categoryId ? parseInt(categoryId) : null
       }
     });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiSave, FiImage } from 'react-icons/fi';
+import { FiSave, FiImage, FiRefreshCw } from 'react-icons/fi';
 
 export default function SettingsAdminPage() {
   const [settings, setSettings] = useState({
@@ -57,14 +57,41 @@ export default function SettingsAdminPage() {
   };
   
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">サイト設定</h1>
+    <div className="animate-fadeIn">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-lg shadow-md mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <h1 className="text-3xl font-bold text-white mb-4 md:mb-0">サイト設定</h1>
+          <div className="flex space-x-3">
+            <button 
+              type="button"
+              onClick={handleSubmit}
+              className="btn bg-white text-indigo-600 hover:bg-indigo-50 flex items-center gap-2 transition-all duration-300 transform hover:scale-105"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+                  <span>保存中...</span>
+                </>
+              ) : (
+                <>
+                  <FiSave />
+                  <span>設定を保存</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
       
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
-          <span className="block sm:inline">{successMessage}</span>
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded mb-6 shadow-md animate-fadeIn">
+          <div className="flex items-center">
+            <svg className="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{successMessage}</span>
+          </div>
         </div>
       )}
       
@@ -231,7 +258,7 @@ export default function SettingsAdminPage() {
               <label className="block text-sm font-medium text-muted mb-1">ロゴ</label>
               <div className="flex items-center space-x-4 mb-2">
                 <img src={settings.logoUrl} alt="サイトロゴ" className="h-10 border border-border rounded" />
-                <button type="button" className="flex items-center text-primary hover:text-primary/80">
+                <button type="button" className="flex items-center text-primary hover:text-primary/80 transition-colors">
                   <FiImage className="mr-1" />
                   <span>変更</span>
                 </button>
@@ -249,7 +276,7 @@ export default function SettingsAdminPage() {
               <label className="block text-sm font-medium text-muted mb-1">ファビコン</label>
               <div className="flex items-center space-x-4 mb-2">
                 <img src={settings.faviconUrl} alt="ファビコン" className="h-8 w-8 border border-border rounded" />
-                <button type="button" className="flex items-center text-primary hover:text-primary/80">
+                <button type="button" className="flex items-center text-primary hover:text-primary/80 transition-colors">
                   <FiImage className="mr-1" />
                   <span>変更</span>
                 </button>
@@ -265,21 +292,21 @@ export default function SettingsAdminPage() {
           </div>
         </div>
         
-        <div className="mt-6">
+        <div className="mt-8 flex justify-end">
           <button
             type="submit"
-            className="btn btn-primary flex items-center gap-2"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors flex items-center gap-2 shadow-md"
             disabled={loading}
           >
             {loading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
                 <span>保存中...</span>
               </>
             ) : (
               <>
                 <FiSave />
-                <span>設定を保存</span>
+                <span>すべての設定を保存</span>
               </>
             )}
           </button>
