@@ -4,9 +4,9 @@
 誰でも簡単にECサイトを構築し、商品やカテゴリを追加して運営できるサービスです。  
 
 ## 使用技術  
-- **AIモデル:** Cursor Sonnet 3.7  
+- **AIモデル:** Cursor
 
 ## 使用技術  
-- **AIモデル:** Cursor Sonnet 3.7  
+- **AIモデル:** Claude-3.7-sonnet
 - **フロントエンド:** Next.js, React.js, Tailwind CSS  
 - **バックエンド:** Prisma, MySQL  
